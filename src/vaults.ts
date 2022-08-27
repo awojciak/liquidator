@@ -47,20 +47,25 @@ export const vaultLoop = async (exchange: Exchange, wallet: Account) => {
   for (const entry of entries) {
     if (!vaults.has(entry.vault.toString())) continue
 
-    const vault = vaults.get(entry.vault.toString()) as Vault
-    const collateralPrice = collateralPrices.get(vault.collateralPriceFeed.toString()) ?? new BN(0)
-    const syntheticPrice = prices.getPriceFor(vault.synthetic).val
-    const amount = getAmountForLiquidation(entry, vault, collateralPrice, syntheticPrice)
+    try {
+      const vault = vaults.get(entry.vault.toString()) as Vault
+      const collateralPrice = collateralPrices.get(vault.collateralPriceFeed.toString()) ?? new BN(0)
+      const syntheticPrice = prices.getPriceFor(vault.synthetic).val
+      const amount = getAmountForLiquidation(entry, vault, collateralPrice, syntheticPrice)
 
-    const xUSDAddress = prices.assetsList.synthetics[0].assetAddress
-    const xUSDToken = new Token(connection, xUSDAddress, TOKEN_PROGRAM_ID, wallet)
+      const xUSDAddress = prices.assetsList.synthetics[0].assetAddress
+      const xUSDToken = new Token(connection, xUSDAddress, TOKEN_PROGRAM_ID, wallet)
 
-    if (amount.val.eqn(0)) continue
+      if (amount.val.eqn(0)) continue
 
-    console.log('Found account for liquidation')
-    console.log(amount.val.toString())
+      console.log('Found account for liquidation')
+      console.log(amount.val.toString())
 
-    await liquidateVault(amount, syntheticPrice, exchange, state, vault, entry, wallet, xUSDToken)
+      await liquidateVault(amount, syntheticPrice, exchange, state, vault, entry, wallet, xUSDToken)
+    } catch (error) {
+      console.log(error)
+      continue
+    }
   }
   console.log(`Finished checking vaults`)
 }
