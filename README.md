@@ -1,6 +1,6 @@
 # Liquidator
 
-This is a liquidator script for Synthetify
+This is a liquidator script for Synthetify      
 
 ## How to setup your own liquidator
 
